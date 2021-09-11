@@ -1,9 +1,9 @@
 from flask_pymongo import PyMongo
-from flask import Flask, json,jsonify
-from werkzeug.wrappers import response
+from flask import Flask, jsonify
 from common.common_utils import make_id
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 app = Flask(__name__)
 app.config['MONGO_DBNAME'] = 'testdb'
@@ -19,33 +19,31 @@ def fetch_all_from_db(index):
         fetched_data.append(res)
     return fetched_data
 
-def fetch_from_db(id):
-    fetched_data = []
-    result = mongo.db.name_.find()
-    for res in result:
-        fetched_data.append(res)
-    return fetched_data
+def fetch_from_db(index=None,query=None,id=id):
+    if query is None:
+        query = {"_id":id}
+    table = mongo.db[index]
+    result = table.find_one(query)
+    return result
 
 
 def post_to_db(index,data):
     table = mongo.db[index ]
-    user_name = data["user_name"]
-    password = data["password"]
-
     if not data:
-        data = {"response": "ERROR"}
+        data = {"msg": "ERROR"}
         return jsonify(data)
     else:
-        id = make_id(api="template")
+        id = make_id(api=index)
+        data.update({"_id":id})
         if id:
             if table.find_one({"id": id}):
-                return {"response": "tweet already exists."}
+                return {"msg": "tweet already exists."}
             else:
-                result = table.insert({"_id": id, "user_name":user_name, "password":password})
+                result = table.insert(data)
                 if result:
-                    return {"response": "User creted", "data":result}
+                    return {"msg": "User creted", "data":result}
         else:
-            return {"response": "id number missing"}
+            return {"msg": "id number missing"}
 
 def update_to_db(data,id):
     res = mongo.db.name_.find_one_and_update({'_id': id}, {'$set': data})
