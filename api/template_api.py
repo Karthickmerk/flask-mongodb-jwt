@@ -13,13 +13,13 @@ app = Flask(__name__)
 APP_URL = "http://127.0.0.1:5000"
 
 class Template_API(Resource):
-    @jwt_required
+    @jwt_required()
     def get(self):
         index = "name_"
         result = get_all_service(index)
-        data = get_jwt_identity()
-        print(data)
-        return jsonify({"result": result ,"JWT_info":"Hello"})
+        current_user = get_jwt_identity()['email']
+        print(current_user)
+        return jsonify({"result": result })
 
     def post(self):
         json_data = request.get_json()

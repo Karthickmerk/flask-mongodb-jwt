@@ -1,3 +1,4 @@
+from flask_jwt_extended.utils import create_access_token
 from pymongo.message import query
 from common.common_utils import make_id
 from db.db_utils import fetch_from_db, post_to_db, update_to_db,fetch_all_from_db
@@ -30,5 +31,5 @@ def login(json_data):
     user_data = fetch_from_db(index=default_index,query=query)
     password = user_data['password']
     if check_password_hash(password, json_data['password']):
-        token = get_access_token(user_id=user_data['_id'])
+        token = create_access_token(identity={"id":user_data['_id'],"email":user_data['email']})
         return token
